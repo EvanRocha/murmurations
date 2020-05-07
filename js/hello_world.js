@@ -23,30 +23,6 @@ const Z_BOUNDARY = 9;
 
 const CAMERA_FIELD_OF_VIEW = 75;
 
-// Random Helpers:
-
-function randomHex() {
-	return "#000000".replace(/0/g, function() {
-		return (~~(Math.random() * 16)).toString(16);
-	});
-}
-
-function distanceBetween(vertice1, vertice2) {
-	return Math.sqrt(
-		Math.pow(vertice1.x - vertice2.x, 2) +
-		Math.pow(vertice1.y - vertice2.y, 2) +
-		Math.pow(vertice1.z - vertice2.z, 2)
-	);
-}
-
-function totalSpeed(vertice) {
-	return Math.sqrt(
-		vertice.velocity.x * vertice.velocity.x +
-		vertice.velocity.y * vertice.velocity.y +
-		vertice.velocity.z * vertice.velocity.z
-	);
-}
-
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(CAMERA_FIELD_OF_VIEW, window.innerWidth / window.innerHeight,
@@ -58,59 +34,151 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 
-let particleSystemGeometry = new THREE.Geometry();
-let particalMaterial = new THREE.PointsMaterial({
-	color: 0xFFFFFF,
-	size: PARTICLE_SCALE
-});
+// let particleSystemGeometry = new THREE.Geometry();
+
+// Copy https://threejs.org/examples/#webgl_custom_attributes_points
+var particles = new Float32Array(NUM_PARTICLES * 3);
+var colors = new Float32Array(NUM_PARTICLES * 3);
+var sizes = new Float32Array(NUM_PARTICLES);
+let particleSystemGeometry = new THREE.BufferGeometry();
+
 
 // now create the individual particles
+// let particles = new Float32Array(NUM_PARTICLES * 3);
+// for (var p = 0; p < NUM_PARTICLES; p += 3) {
+// 	const particle = new THREE.Vector3(
+// 		Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE,
+// 		Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE,
+// 		Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE,
+// 	);
+
+// 	create a velocity vector
+// 	particle.velocity = new THREE.Vector3(
+// 		Math.cos(Math.random() * Math.PI) * INITIAL_PARTICLE_VELOCITY,
+// 		Math.cos(Math.random() * Math.PI) * INITIAL_PARTICLE_VELOCITY,
+// 		Math.cos(Math.random() * Math.PI) * INITIAL_PARTICLE_VELOCITY,
+// 	);
+// 	particleSystemGeometry.vertices.push(particle);
+
+// 	// particles[p] = Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE;
+// 	// particles[p + 1] = Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE;
+// 	// particles[p + 2] = Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE;
+// }
+
+let vertex = new THREE.Vector3();
+let color = new THREE.Color(0xffffff);
 for (var p = 0; p < NUM_PARTICLES; p++) {
-	const particle = new THREE.Vector3(
-		Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE,
-		Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE,
-		Math.cos(Math.random() * Math.PI) * INITIAL_POSITION_RANGE,
-	);
 
-	// create a velocity vector
-	particle.velocity = new THREE.Vector3(
-		Math.cos(Math.random() * Math.PI) * INITIAL_PARTICLE_VELOCITY,
-		Math.cos(Math.random() * Math.PI) * INITIAL_PARTICLE_VELOCITY,
-		Math.cos(Math.random() * Math.PI) * INITIAL_PARTICLE_VELOCITY,
-	);
+	vertex.x = (Math.random() * 2 - 1) * INITIAL_POSITION_RANGE;
+	vertex.y = (Math.random() * 2 - 1) * INITIAL_POSITION_RANGE;
+	vertex.z = (Math.random() * 2 - 1) * INITIAL_POSITION_RANGE;
+	vertex.toArray(particles, p * 3);
 
-	// particleSystemGeometry.colors.push(randomHex());
-	particleSystemGeometry.vertices.push(particle);
+	if (vertex.x < 0) {
+
+		color.setHSL(0.5 + 0.1 * (p / NUM_PARTICLES), 0.7, 0.5);
+
+	} else {
+
+		color.setHSL(0.0 + 0.1 * (p / NUM_PARTICLES), 0.9, 0.5);
+
+	}
+
+	color.toArray(colors, p * 3);
+
+	sizes[p] = 10;
+
 }
+
+particleSystemGeometry.setAttribute('position', new THREE.BufferAttribute(particles, 3));
+particleSystemGeometry.setAttribute(
+	'customColor',
+	new THREE.BufferAttribute(colors, 3)
+);
+particleSystemGeometry.setAttribute(
+	'size',
+	new THREE.BufferAttribute(sizes, 1)
+);
+
+// let particalMaterial = new THREE.PointsMaterial({
+// 	color: 0xFFFFFF,
+// 	size: PARTICLE_SCALE,
+// 	// wireframe: true,
+// });
+
+var sparklyMaterial = new THREE.ShaderMaterial({
+	uniforms: {
+		color: {
+			value: new THREE.Color(0xffffff)
+		},
+		pointTexture: {
+			value: new THREE.TextureLoader().load("../textures/sprites/spark1.png")
+		}
+	},
+	vertexShader: document.getElementById('vertexshader').textContent,
+	fragmentShader: document.getElementById('fragmentshader').textContent,
+
+	blending: THREE.AdditiveBlending,
+	depthTest: false,
+	transparent: true,
+
+});
 
 // create the particle system
 let particleSystem = new THREE.Points(
 	particleSystemGeometry,
-	particalMaterial
+	sparklyMaterial
 );
 scene.add(particleSystem);
 
 let animate = function() {
 
-	particleSystemGeometry.vertices.map(vertice => {
-		applySocialAttraction(vertice);
-		applySocialDistancing(vertice);
-		applySocialCohesion(vertice);
-		applyVelocityLimit(vertice);
-		applyPositionBoundary(vertice, 'x', X_BOUNDARY);
-		applyPositionBoundary(vertice, 'y', Y_BOUNDARY);
-		applyPositionBoundary(vertice, 'z', Z_BOUNDARY);
+	// particleSystemGeometry.vertices.map(vertice => {
+	// 	applySocialAttraction(vertice);
+	// 	applySocialDistancing(vertice);
+	// 	applySocialCohesion(vertice);
+	// 	applyVelocityLimit(vertice);
+	// 	applyPositionBoundary(vertice, 'x', X_BOUNDARY);
+	// 	applyPositionBoundary(vertice, 'y', Y_BOUNDARY);
+	// 	applyPositionBoundary(vertice, 'z', Z_BOUNDARY);
 
-		// update the position
-		vertice.x = vertice.x + vertice.velocity.x;
-		vertice.y = vertice.y + vertice.velocity.y;
-		vertice.z = vertice.z + vertice.velocity.z;
-	});
+	// 	// update the position
+	// 	vertice.x = vertice.x + vertice.velocity.x;
+	// 	vertice.y = vertice.y + vertice.velocity.y;
+	// 	vertice.z = vertice.z + vertice.velocity.z;
+	// });
 
-	particleSystem.geometry.verticesNeedUpdate = true;
+	// particleSystem.geometry.verticesNeedUpdate = true;
+
+	let geometry = particleSystem.geometry;
+	let attributes = geometry.attributes;
+	var time = Date.now() * 0.005;
+
+	for (var i = 0; i < attributes.size.array.length; i++) {
+		attributes.size.array[i] = 14 + 13 * Math.sin(0.1 * i + time);
+
+	}
+
+	attributes.size.needsUpdate = true;
+
+
 	renderer.render(scene, camera);
-	requestAnimationFrame(animate);
+	// requestAnimationFrame(animate);
 };
+
+animate();
+
+window.addEventListener('resize', onWindowResize, false);
+
+
+function onWindowResize() {
+
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+
+	renderer.setSize(window.innerWidth, window.innerHeight);
+
+}
 
 // Find the center of mass of the other boids and adjust velocity slightly to
 // point towards the center of mass.
@@ -210,10 +278,31 @@ function applyPositionBoundary(vertice, dimension, absoluteBoundary) {
 }
 
 
-animate();
+// Random Helpers:
+
+function randomHex() {
+	return "#000000".replace(/0/g, function() {
+		return (~~(Math.random() * 16)).toString(16);
+	});
+}
+
+function distanceBetween(vertice1, vertice2) {
+	return Math.sqrt(
+		Math.pow(vertice1.x - vertice2.x, 2) +
+		Math.pow(vertice1.y - vertice2.y, 2) +
+		Math.pow(vertice1.z - vertice2.z, 2)
+	);
+}
+
+function totalSpeed(vertice) {
+	return Math.sqrt(
+		vertice.velocity.x * vertice.velocity.x +
+		vertice.velocity.y * vertice.velocity.y +
+		vertice.velocity.z * vertice.velocity.z
+	);
+}
 
 
 // TODO: 
-// Make boid!
 // Make particles look pretty (lights?!?!)
 // Make camera moveable

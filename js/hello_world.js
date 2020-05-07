@@ -1,4 +1,7 @@
 import * as THREE from './node_modules/three/src/Three.js';
+import {
+	OrbitControls
+} from './OrbitControls.js';
 
 const NUM_PARTICLES = 1000;
 const PARTICLE_SCALE = 0.2;
@@ -57,6 +60,9 @@ let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+var controls = new OrbitControls(camera, renderer.domElement);
+controls.update();
+
 
 let particleSystemGeometry = new THREE.Geometry();
 let particalMaterial = new THREE.PointsMaterial({
@@ -108,6 +114,8 @@ let animate = function() {
 	});
 
 	particleSystem.geometry.verticesNeedUpdate = true;
+
+	controls.update();
 	renderer.render(scene, camera);
 	requestAnimationFrame(animate);
 };

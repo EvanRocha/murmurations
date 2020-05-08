@@ -3,26 +3,26 @@ import {
 	OrbitControls
 } from './OrbitControls.js';
 
-const NUM_PARTICLES = 1000;
-const PARTICLE_SCALE = 0.2;
+const NUM_PARTICLES = 1500;
+const PARTICLE_SCALE = 0.6;
 const INITIAL_POSITION_RANGE = 15;
 
 // Movement
 const INITIAL_PARTICLE_VELOCITY = 0.20;
-const MAX_PARTICLE_VELOCITY = 0.45;
+const MAX_PARTICLE_VELOCITY = 0.40;
 const PARTICLE_TURN_ACCELERATION = 0.1;
 
 // Social
 const PARTICLE_VISUAL_RANGE = 2;
 const SOCIAL_ATTRACTION_FACTOR = 0.5;
 const SOCIAL_COHESION_FACTOR = 0.5;
-const SOCIAL_DISTANCING_FACTOR = 0.5;
+const SOCIAL_DISTANCING_FACTOR = 0.35;
 const MINIMUM_SOCIAL_DISTANCE = 1.25;
 
 // Boundaries
-const X_BOUNDARY = 12;
-const Y_BOUNDARY = 9;
-const Z_BOUNDARY = 9;
+const X_BOUNDARY = 14;
+const Y_BOUNDARY = 10;
+const Z_BOUNDARY = 10;
 
 const CAMERA_FIELD_OF_VIEW = 75;
 
@@ -110,7 +110,7 @@ let camera = new THREE.PerspectiveCamera(
 	0.1,
 	1000,
 );
-camera.position.z = 25;
+camera.position.z = 35;
 
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -133,9 +133,14 @@ scene.add(sphere);
 
 let particleSystemGeometry = new THREE.Geometry();
 let particalMaterial = new THREE.PointsMaterial({
-	color: 0xFFFFFF,
-	size: PARTICLE_SCALE
+	color: 0x000000,
+	size: PARTICLE_SCALE,
+	map: new THREE.TextureLoader().load('../textures/sprites/softcircle.png'),
+	sizeAttenuation: true,
+	alphaTest: 0.5,
+	transparent: true,
 });
+
 
 // now create the individual particles
 for (var p = 0; p < NUM_PARTICLES; p++) {

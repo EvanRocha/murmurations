@@ -1,4 +1,4 @@
-import * as THREE from './node_modules/three/src/Three.js';
+import * as THREE from "./node_modules/three/build/three.module.js";
 import {
 	OrbitControls
 } from './OrbitControls.js';
@@ -52,9 +52,65 @@ function totalSpeed(vertice) {
 
 
 let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(CAMERA_FIELD_OF_VIEW, window.innerWidth / window.innerHeight,
-	0.1, 1000);
-camera.position.z = 20;
+scene.background = new THREE.Color(0x0f0f0f);
+
+var rev = false;
+var cols = [{
+	stop: 0,
+	color: new THREE.Color(0xf7b000)
+}, {
+	stop: .35,
+	color: new THREE.Color(0xdd0080)
+}, {
+	stop: .5,
+	color: new THREE.Color(0x622b85)
+}, {
+	stop: .75,
+	color: new THREE.Color(0x007dae)
+}, {
+	stop: 1,
+	color: new THREE.Color(0x77c8db)
+}];
+
+function setGradient(geometry, colors, axis, reverse) {
+
+	geometry.computeBoundingBox();
+
+	var bbox = geometry.boundingBox;
+	var size = new THREE.Vector3().subVectors(bbox.max, bbox.min);
+
+	var vertexIndices = ['a', 'b', 'c'];
+	var face, vertex, normalized = new THREE.Vector3(),
+		normalizedAxis = 0;
+
+	for (var c = 0; c < colors.length - 1; c++) {
+
+		var colorDiff = colors[c + 1].stop - colors[c].stop;
+
+		for (var i = 0; i < geometry.faces.length; i++) {
+			face = geometry.faces[i];
+			for (var v = 0; v < 3; v++) {
+				vertex = geometry.vertices[face[vertexIndices[v]]];
+				normalizedAxis = normalized.subVectors(vertex, bbox.min).divide(size)[axis];
+				if (reverse) {
+					normalizedAxis = 1 - normalizedAxis;
+				}
+				if (normalizedAxis >= colors[c].stop && normalizedAxis <= colors[c + 1].stop) {
+					var localNormalizedAxis = (normalizedAxis - colors[c].stop) / colorDiff;
+					face.vertexColors[v] = colors[c].color.clone().lerp(colors[c + 1].color, localNormalizedAxis);
+				}
+			}
+		}
+	}
+}
+
+let camera = new THREE.PerspectiveCamera(
+	CAMERA_FIELD_OF_VIEW,
+	window.innerWidth / window.innerHeight,
+	0.1,
+	1000,
+);
+camera.position.z = 25;
 
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -62,6 +118,17 @@ document.body.appendChild(renderer.domElement);
 
 var controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
+
+// Skybox
+var geometry = new THREE.SphereGeometry(100, 100, 100);
+var material = new THREE.MeshBasicMaterial({
+	vertexColors: THREE.VertexColors,
+	wireframe: false
+});
+setGradient(geometry, cols, 'y', false);
+material.side = THREE.BackSide;
+var sphere = new THREE.Mesh(geometry, material);
+scene.add(sphere);
 
 
 let particleSystemGeometry = new THREE.Geometry();
@@ -234,6 +301,6 @@ animate();
 
 
 // TODO: 
-// Make boid!
+// Gradient sunset skybox
+// Lights
 // Make particles look pretty (lights?!?!)
-// Make camera moveable

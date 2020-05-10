@@ -38,7 +38,9 @@ let cameraControls = null;
 let cameraBoundarySphere = null;
 let particleSystemGeometry = null;
 
+// init Vectorsto avoid object creation in animation loop 
 let inPlaceVector = new THREE.Vector3();
+let inPlaceSocialDistancingParticleVector = new THREE.Vector3();
 
 function init() {
 	initRenderer();
@@ -202,10 +204,10 @@ function updateVelocityForSocialDistancing(particle) {
 
 		if (otherParticle !== particle &&
 			particle.distanceTo(otherParticle) < MINIMUM_SOCIAL_DISTANCE) {
+			inPlaceSocialDistancingParticleVector.copy(particle);
 			personalSpaceNeeded
-				.add(particle
-					.clone()
-					.sub(otherParticle)
+				.add(
+					inPlaceSocialDistancingParticleVector.sub(otherParticle)
 				);
 		}
 	}

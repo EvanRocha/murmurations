@@ -1,7 +1,7 @@
 import * as THREE from "./node_modules/three/build/three.module.js";
 import {
 	OrbitControls
-} from './OrbitControls.js';
+} from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 
 const NUM_PARTICLES = 1000;
 const PARTICLE_SCALE = 0.65;

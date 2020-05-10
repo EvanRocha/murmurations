@@ -1,3 +1,6 @@
+/**
+ * @author evanrocha https://github.com/EvanRocha
+ */
 import * as THREE from "./node_modules/three/build/three.module.js";
 import {
 	OrbitControls

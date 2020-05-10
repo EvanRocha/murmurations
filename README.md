@@ -10,5 +10,5 @@ python -m SimpleHTTPServer
 
 Then access at
 ```
-http://localhost:8000/index.html
+http://localhost:8000
 ```

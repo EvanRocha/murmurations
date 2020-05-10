@@ -6,21 +6,21 @@ import {
 	OrbitControls
 } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 
-const NUM_PARTICLES = 1000;
+const NUM_PARTICLES = 800;
 const PARTICLE_SCALE = 0.65;
 const INITIAL_POSITION_RANGE = 1;
 
 // Movement
-const INITIAL_PARTICLE_VELOCITY = 0.405;
+const INITIAL_PARTICLE_VELOCITY = 0.41;
 const MAX_PARTICLE_VELOCITY = 0.405;
 const PARTICLE_TURN_ACCELERATION = 0.039;
 
 // Social
 const PARTICLE_VISUAL_RANGE = 2;
-const SOCIAL_ATTRACTION_FACTOR = 0.5;
+const SOCIAL_ATTRACTION_FACTOR = 0.1;
 const SOCIAL_COHESION_FACTOR = 0.5;
-const SOCIAL_DISTANCING_FACTOR = 0.35;
-const MINIMUM_SOCIAL_DISTANCE = 1.25;
+const SOCIAL_DISTANCING_FACTOR = 0.1;
+const MINIMUM_SOCIAL_DISTANCE = 1.5;
 
 // Boundaries
 const X_BOUNDARY = 14;

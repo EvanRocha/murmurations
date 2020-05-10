@@ -31,7 +31,6 @@ camera.position.z = 20;
 
 let renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer
 document.body.appendChild(renderer.domElement);
 
 
@@ -101,10 +100,11 @@ particleSystemGeometry.setAttribute(
 	new THREE.BufferAttribute(sizes, 1)
 );
 
-let particalMaterial = new THREE.PointsMaterial({
-	color: 0xFFFFFF,
-	size: PARTICLE_SCALE,
-});
+// let particalMaterial = new THREE.PointsMaterial({
+// 	color: 0xFFFFFF,
+// 	size: PARTICLE_SCALE,
+// 	// wireframe: true,
+// });
 
 var sparklyMaterial = new THREE.ShaderMaterial({
 	uniforms: {
@@ -115,12 +115,12 @@ var sparklyMaterial = new THREE.ShaderMaterial({
 			value: new THREE.TextureLoader().load("../textures/sprites/spark1.png")
 		}
 	},
-	// vertexShader: document.getElementById('vertexshader').textContent,
-	// fragmentShader: document.getElementById('fragmentshader').textContent,
+	vertexShader: document.getElementById('vertexshader').textContent,
+	fragmentShader: document.getElementById('fragmentshader').textContent,
 
-	// blending: THREE.AdditiveBlending,
-	// depthTest: false,
-	// transparent: true,
+	blending: THREE.AdditiveBlending,
+	depthTest: false,
+	transparent: true,
 
 });
 

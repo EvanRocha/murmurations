@@ -24,6 +24,7 @@ const X_BOUNDARY = 14;
 const Y_BOUNDARY = 10;
 const Z_BOUNDARY = 10;
 
+// Camera
 const CAMERA_FIELD_OF_VIEW = 75;
 const CAMERA_MAX_POSITION = 75;
 
@@ -120,9 +121,9 @@ function initSkyBox() {
 		wireframe: false
 	});
 	setGradient(geometry, cols, 'y', false);
+
 	material.side = THREE.BackSide;
 	scene.add(new THREE.Mesh(geometry, material));
-
 }
 
 function initParticles() {
@@ -254,7 +255,6 @@ function updatePositionForBoundary(camera) {
 }
 
 function onWindowResize(camera, renderer) {
-
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 
@@ -263,7 +263,6 @@ function onWindowResize(camera, renderer) {
 }
 
 function setGradient(geometry, colors, axis, reverse) {
-
 	geometry.computeBoundingBox();
 
 	let bbox = geometry.boundingBox;

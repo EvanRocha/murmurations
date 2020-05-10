@@ -38,6 +38,8 @@ let cameraControls = null;
 let cameraBoundarySphere = null;
 let particleSystemGeometry = null;
 
+let inPlaceVector = new THREE.Vector3();
+
 function init() {
 	initRenderer();
 	initScene();
@@ -49,9 +51,11 @@ function init() {
 }
 
 function animate() {
-
 	particleSystemGeometry.vertices.map(particle => {
 		// Update particle velocity
+		// NOTE: Its currently updating all the velocities in place
+		// which creates a bit of a bug where particles are updating based off
+		// new velocities. Ideally would all operate on previous frame velocities
 		updateVelocityForSocialAttraction(particle);
 		updateVelocityForSocialDistancing(particle);
 		updateVelocityForSocialCohesion(particle);
@@ -168,7 +172,8 @@ function initParticles() {
 
 // Adjusts velocity of particle towards center of other particles in its visual range
 function updateVelocityForSocialAttraction(particle) {
-	let visualCenter = new THREE.Vector3();
+	let visualCenter = inPlaceVector;
+	resetVector(visualCenter);
 	let numNeighbors = 0;
 
 	for (let otherParticle of particleSystemGeometry.vertices) {
@@ -190,7 +195,9 @@ function updateVelocityForSocialAttraction(particle) {
 
 // Adjusts velocity of particle away from other particles that are too close
 function updateVelocityForSocialDistancing(particle) {
-	let personalSpaceNeeded = new THREE.Vector3();
+	let personalSpaceNeeded = inPlaceVector;
+	resetVector(personalSpaceNeeded);
+
 	for (let otherParticle of particleSystemGeometry.vertices) {
 
 		if (otherParticle !== particle &&
@@ -211,7 +218,8 @@ function updateVelocityForSocialDistancing(particle) {
 
 // Adjusts particle velocity to align with average velocity within visual range
 function updateVelocityForSocialCohesion(particle) {
-	let avgVelocity = new THREE.Vector3();
+	let avgVelocity = inPlaceVector;
+	resetVector(avgVelocity);
 	let numNeighbors = 0;
 
 	for (let otherParticle of particleSystemGeometry.vertices) {
@@ -263,6 +271,12 @@ function onWindowResize(camera, renderer) {
 
 	renderer.setSize(window.innerWidth, window.innerHeight);
 
+}
+
+function resetVector(vector) {
+	vector.x = 0;
+	vector.y = 0;
+	vector.z = 0;
 }
 
 function setGradient(geometry, colors, axis, reverse) {

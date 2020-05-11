@@ -6,7 +6,7 @@ import {
 	OrbitControls
 } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 
-const NUM_PARTICLES = 800;
+const NUM_PARTICLES = 700;
 const PARTICLE_SCALE = 0.65;
 const INITIAL_POSITION_RANGE = 1;
 

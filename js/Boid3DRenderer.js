@@ -197,41 +197,43 @@ function updateVelocityForSocialAttraction(particle) {
 
 // Adjusts velocity of particle away from other particles that are too close
 function updateVelocityForSocialDistancing(particle) {
-	// NOTE: This might be more performant then the code I am using
-	// let moveX = 0;
-	// let moveY = 0;
-	// let moveZ = 0;
-	// for (let otherVertice of particleSystemGeometry.vertices) {
-	// 	if (otherVertice !== particle) {
-	// 		if (particle.distanceTo(otherVertice) < MINIMUM_SOCIAL_DISTANCE) {
-	// 			moveX += particle.x - otherVertice.x;
-	// 			moveY += particle.y - otherVertice.y;
-	// 			moveZ += particle.z - otherVertice.z;
-	// 		}
-	// 	}
-	// }
 
-	// particle.velocity.x += moveX * SOCIAL_DISTANCING_FACTOR;
-	// particle.velocity.y += moveY * SOCIAL_DISTANCING_FACTOR;
-	// particle.velocity.z += moveZ * SOCIAL_DISTANCING_FACTOR;
-
-	let personalSpaceNeeded = inPlaceVector;
-	resetVector(personalSpaceNeeded);
-	for (let otherParticle of particleSystemGeometry.vertices) {
-		if (otherParticle !== particle) {
-			if (otherParticle !== particle && particle.distanceTo(otherParticle) < MINIMUM_SOCIAL_DISTANCE) {
-				personalSpaceNeeded
-					.add(
-						inPlaceSocialDistancingParticleVector.subVectors(particle, otherParticle)
-					);
+	// NOTE: Was running into performance issues using the THREE Vector math functions 
+	// Using raw math here instead. Left old code below.
+	let moveX = 0;
+	let moveY = 0;
+	let moveZ = 0;
+	for (let otherVertice of particleSystemGeometry.vertices) {
+		if (otherVertice !== particle) {
+			if (particle.distanceTo(otherVertice) < MINIMUM_SOCIAL_DISTANCE) {
+				moveX += particle.x - otherVertice.x;
+				moveY += particle.y - otherVertice.y;
+				moveZ += particle.z - otherVertice.z;
 			}
 		}
 	}
 
-	particle.velocity
-		.add(
-			personalSpaceNeeded.multiplyScalar(SOCIAL_DISTANCING_FACTOR)
-		);
+	particle.velocity.x += moveX * SOCIAL_DISTANCING_FACTOR;
+	particle.velocity.y += moveY * SOCIAL_DISTANCING_FACTOR;
+	particle.velocity.z += moveZ * SOCIAL_DISTANCING_FACTOR;
+
+	// let personalSpaceNeeded = inPlaceVector;
+	// resetVector(personalSpaceNeeded);
+	// for (let otherParticle of particleSystemGeometry.vertices) {
+	// 	if (otherParticle !== particle) {
+	// 		if (otherParticle !== particle && particle.distanceTo(otherParticle) < MINIMUM_SOCIAL_DISTANCE) {
+	// 			personalSpaceNeeded
+	// 				.add(
+	// 					inPlaceSocialDistancingParticleVector.subVectors(particle, otherParticle)
+	// 				);
+	// 		}
+	// 	}
+	// }
+
+	// particle.velocity
+	// 	.add(
+	// 		personalSpaceNeeded.multiplyScalar(SOCIAL_DISTANCING_FACTOR)
+	// 	);
 }
 
 // Adjusts particle velocity to align with average velocity within visual range

@@ -140,7 +140,7 @@ function initParticles() {
 	let particleMaterial = new THREE.PointsMaterial({
 		color: 0x000000,
 		size: PARTICLE_SCALE,
-		map: new THREE.TextureLoader().load('../textures/sprites/softcircle.png'),
+		// map: new THREE.TextureLoader().load('../textures/sprites/softcircle.png'),
 		sizeAttenuation: true,
 		alphaTest: 0.5,
 		transparent: true,

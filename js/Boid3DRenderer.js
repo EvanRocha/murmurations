@@ -6,8 +6,8 @@ import {
 	OrbitControls
 } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 
-const NUM_PARTICLES = 700;
-const PARTICLE_SCALE = 0.65;
+const NUM_PARTICLES = 600;
+const PARTICLE_SCALE = 1;
 const INITIAL_POSITION_RANGE = 1;
 
 // Movement
@@ -140,7 +140,7 @@ function initParticles() {
 	let particleMaterial = new THREE.PointsMaterial({
 		color: 0x000000,
 		size: PARTICLE_SCALE,
-		// map: new THREE.TextureLoader().load('../textures/sprites/softcircle.png'),
+		map: new THREE.TextureLoader().load('../textures/sprites/softcircle.png'),
 		sizeAttenuation: true,
 		alphaTest: 0.5,
 		transparent: true,

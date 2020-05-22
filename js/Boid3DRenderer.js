@@ -5,8 +5,11 @@ import * as THREE from "./node_modules/three/build/three.module.js";
 import {
 	OrbitControls
 } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+import {
+	Sky
+} from './node_modules/three/examples/jsm/objects/Sky.js';
 
-const NUM_PARTICLES = 500;
+const NUM_PARTICLES = 1000;
 const PARTICLE_SCALE = 1;
 const INITIAL_POSITION_RANGE = 1;
 
@@ -31,12 +34,33 @@ const Z_BOUNDARY = 10;
 const CAMERA_FIELD_OF_VIEW = 75;
 const CAMERA_MAX_POSITION = 75;
 
+// Sun
+const SUN_INITIAL_INCILNATION = 0.511;
+const SUN_TARGET_INCLINATION = 0.475;
+const SUN_INCLINATION_SPEED = 0.00002;
+
 let scene = null;
 let renderer = null;
 let camera = null;
 let cameraControls = null;
 let cameraBoundarySphere = null;
 let particleSystemGeometry = null;
+
+let sky = null;
+let sunSphere = null;
+let sunConfig = {
+	turbidity: 10,
+	rayleigh: 2,
+	mieCoefficient: 0.005,
+	mieDirectionalG: 0.8,
+	luminance: 1,
+	inclination: SUN_INITIAL_INCILNATION,
+	targetInclination: SUN_TARGET_INCLINATION,
+	azimuth: 0.25, // Facing front,
+	distance: 40000,
+};
+
+
 
 // init Vectorsto avoid object creation in animation loop 
 let inPlaceVector = new THREE.Vector3();
@@ -74,6 +98,8 @@ function animate() {
 	cameraControls.update();
 	updatePositionForBoundary(camera);
 
+	updateSunPosition();
+
 	// render
 	renderer.render(scene, camera);
 	requestAnimationFrame(animate);
@@ -107,32 +133,26 @@ function initCamera() {
 }
 
 function initSkyBox() {
-	let cols = [{
-		stop: 0,
-		color: new THREE.Color(0xf7b000)
-	}, {
-		stop: .35,
-		color: new THREE.Color(0xdd0080)
-	}, {
-		stop: .5,
-		color: new THREE.Color(0x622b85)
-	}, {
-		stop: .75,
-		color: new THREE.Color(0x007dae)
-	}, {
-		stop: 1,
-		color: new THREE.Color(0x77c8db)
-	}];
+	sky = new Sky();
+	sky.scale.setScalar(1000);
+	scene.add(sky);
 
-	let geometry = new THREE.SphereGeometry(100, 100, 100);
-	let material = new THREE.MeshBasicMaterial({
-		vertexColors: THREE.VertexColors,
-		wireframe: false
-	});
-	setGradient(geometry, cols, 'y', false);
+	sunSphere = new THREE.Mesh(
+		new THREE.SphereBufferGeometry(20000, 16, 8),
+		new THREE.MeshBasicMaterial({
+			color: 0xffffff
+		})
+	);
+	scene.add(sunSphere);
 
-	material.side = THREE.BackSide;
-	scene.add(new THREE.Mesh(geometry, material));
+	var uniforms = sky.material.uniforms;
+	uniforms["turbidity"].value = sunConfig.turbidity;
+	uniforms["rayleigh"].value = sunConfig.rayleigh;
+	uniforms["mieCoefficient"].value = sunConfig.mieCoefficient;
+	uniforms["mieDirectionalG"].value = sunConfig.mieDirectionalG;
+	uniforms["luminance"].value = sunConfig.luminance;
+
+	updateSunPosition();
 }
 
 function initParticles() {
@@ -193,7 +213,6 @@ function updateVelocityForSocialAttraction(particle) {
 		);
 	}
 }
-
 
 // Adjusts velocity of particle away from other particles that are too close
 function updateVelocityForSocialDistancing(particle) {
@@ -285,6 +304,22 @@ function updatePositionForBoundary(camera) {
 	cameraBoundarySphere.clampPoint(camera.position, camera.position);
 }
 
+function updateSunPosition() {
+	var uniforms = sky.material.uniforms;
+
+	if (sunConfig.inclination >= sunConfig.targetInclination) {
+		sunConfig.inclination -= 0.00002;
+	}
+	var theta = Math.PI * (sunConfig.inclination - 0.5);
+	var phi = 2 * Math.PI * (sunConfig.azimuth - 0.5);
+
+	sunSphere.position.x = sunConfig.distance * Math.cos(phi);
+	sunSphere.position.y = sunConfig.distance * Math.sin(phi) * Math.sin(theta);
+	sunSphere.position.z = sunConfig.distance * Math.sin(phi) * Math.cos(theta);
+
+	uniforms["sunPosition"].value.copy(sunSphere.position);
+}
+
 function onWindowResize(camera, renderer) {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
@@ -297,43 +332,6 @@ function resetVector(vector) {
 	vector.x = 0;
 	vector.y = 0;
 	vector.z = 0;
-}
-
-function setGradient(geometry, colors, axis, reverse) {
-	geometry.computeBoundingBox();
-
-	let bbox = geometry.boundingBox;
-	let size = new THREE.Vector3().subVectors(bbox.max, bbox.min);
-
-	let vertexIndices = ['a', 'b', 'c'];
-	let face, vertex, normalized = new THREE.Vector3(),
-		normalizedAxis = 0;
-
-	for (let c = 0; c < colors.length - 1; c++) {
-
-		let colorDiff = colors[c + 1].stop - colors[c].stop;
-
-		for (let i = 0; i < geometry.faces.length; i++) {
-			face = geometry.faces[i];
-			for (let v = 0; v < 3; v++) {
-				vertex = geometry.vertices[face[vertexIndices[v]]];
-				normalizedAxis = normalized
-					.subVectors(vertex, bbox.min)
-					.divide(size)[axis];
-
-				if (reverse) {
-					normalizedAxis = 1 - normalizedAxis;
-				}
-
-				if (normalizedAxis >= colors[c].stop && normalizedAxis <= colors[c + 1].stop) {
-					let localNormalizedAxis = (normalizedAxis - colors[c].stop) / colorDiff;
-					face.vertexColors[v] = colors[c].color
-						.clone()
-						.lerp(colors[c + 1].color, localNormalizedAxis);
-				}
-			}
-		}
-	}
 }
 
 init();

@@ -3,20 +3,23 @@
  */
 import * as THREE from "./node_modules/three/build/three.module.js";
 import {
+	WEBGL
+} from './node_modules/three/examples/jsm/WebGL.js';
+import {
 	OrbitControls
 } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 import {
 	Sky
 } from './node_modules/three/examples/jsm/objects/Sky.js';
 
-const NUM_PARTICLES = 1000;
+const PARTICLES_COUNT = 1000;
 const PARTICLE_SCALE = 1;
-const INITIAL_POSITION_RANGE = 1;
+const PARTICLE_INITIAL_POSITION_RANGE = 1;
 
 // Movement
-const INITIAL_PARTICLE_VELOCITY = 0.41;
-const MAX_PARTICLE_VELOCITY = 0.405;
-const PARTICLE_TURN_ACCELERATION = 0.039;
+const PARTICLE_INITIAL_VELOCITY = 0.41;
+const PARTICLE_MAX_VELOCITY = 0.405;
+const PARTICLE_TURN_ACCELERATION = 0.038;
 
 // Social
 const PARTICLE_VISUAL_RANGE = 2;
@@ -32,7 +35,8 @@ const Z_BOUNDARY = 10;
 
 // Camera
 const CAMERA_FIELD_OF_VIEW = 75;
-const CAMERA_MAX_POSITION = 75;
+const CAMERA_MAX_POSITION = 100;
+const CAMERA_INITIAL_POSITION = 65;
 
 // Sun
 const SUN_INITIAL_INCILNATION = 0.511;
@@ -123,7 +127,7 @@ function initCamera() {
 		0.1,
 		1000,
 	);
-	camera.position.z = 35;
+	camera.position.z = CAMERA_INITIAL_POSITION;
 
 	// Sphere to bound the particles
 	cameraBoundarySphere = new THREE.Sphere(new THREE.Vector3(), CAMERA_MAX_POSITION);
@@ -167,18 +171,18 @@ function initParticles() {
 	});
 
 	// now create the individual particles
-	for (var p = 0; p < NUM_PARTICLES; p++) {
+	for (var p = 0; p < PARTICLES_COUNT; p++) {
 		const particle = new THREE.Vector3(
-			Math.random() * 2 * INITIAL_POSITION_RANGE - INITIAL_POSITION_RANGE,
-			Math.random() * 2 * INITIAL_POSITION_RANGE - INITIAL_POSITION_RANGE,
-			Math.random() * 2 * INITIAL_POSITION_RANGE - INITIAL_POSITION_RANGE,
+			Math.random() * 2 * PARTICLE_INITIAL_POSITION_RANGE - PARTICLE_INITIAL_POSITION_RANGE,
+			Math.random() * 2 * PARTICLE_INITIAL_POSITION_RANGE - PARTICLE_INITIAL_POSITION_RANGE,
+			Math.random() * 2 * PARTICLE_INITIAL_POSITION_RANGE - PARTICLE_INITIAL_POSITION_RANGE,
 		);
 
 		// create a velocity vector. Hackily add it to the particle object
 		particle.velocity = new THREE.Vector3(
-			Math.random() * 2 * INITIAL_PARTICLE_VELOCITY - INITIAL_PARTICLE_VELOCITY,
-			Math.random() * 2 * INITIAL_PARTICLE_VELOCITY - INITIAL_PARTICLE_VELOCITY,
-			Math.random() * 2 * INITIAL_PARTICLE_VELOCITY - INITIAL_PARTICLE_VELOCITY,
+			Math.random() * 2 * PARTICLE_INITIAL_VELOCITY - PARTICLE_INITIAL_VELOCITY,
+			Math.random() * 2 * PARTICLE_INITIAL_VELOCITY - PARTICLE_INITIAL_VELOCITY,
+			Math.random() * 2 * PARTICLE_INITIAL_VELOCITY - PARTICLE_INITIAL_VELOCITY,
 		);
 
 		particleSystemGeometry.vertices.push(particle);
@@ -279,10 +283,10 @@ function updateVelocityForSocialCohesion(particle) {
 
 // Prevent particle from going too fast
 function updateVelocityForVelocityLimit(particle) {
-	if (particle.velocity.length() > MAX_PARTICLE_VELOCITY) {
+	if (particle.velocity.length() > PARTICLE_MAX_VELOCITY) {
 		particle.velocity = particle.velocity
 			.normalize()
-			.multiplyScalar(MAX_PARTICLE_VELOCITY);
+			.multiplyScalar(PARTICLE_MAX_VELOCITY);
 	}
 }
 
@@ -334,5 +338,13 @@ function resetVector(vector) {
 	vector.z = 0;
 }
 
-init();
-animate();
+if (WEBGL.isWebGLAvailable()) {
+
+	// Initiate function or other initializations here
+	init();
+	animate();
+} else {
+	var warning = WEBGL.getWebGLErrorMessage();
+	document.body.appendChild(warning);
+
+}

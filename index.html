@@ -4,7 +4,12 @@
 		<title>3D Boid</title>
 		<style>
 			body { margin: 0; }
-			canvas { display: block; }
+			#canvas {
+				position: absolute;
+				background-color: black;
+				height: 100%;
+				width: 100%;
+			}
 			.link { position: absolute;
 							bottom: 20px;
   					 	right: 20px;
@@ -24,6 +29,7 @@
 	</head>
 	<body>
 		<script  type="module" src="js/Boid3DRenderer.js"></script>
+		<div id="canvas"/>
 		<a class="link" href="https://github.com/EvanRocha/3DBoid">Source</a>
 
 	</body>

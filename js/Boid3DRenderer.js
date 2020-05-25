@@ -112,7 +112,7 @@ function animate() {
 function initRenderer() {
 	renderer = new THREE.WebGLRenderer();
 	renderer.setSize(window.innerWidth, window.innerHeight);
-	document.body.appendChild(renderer.domElement);
+	document.getElementById("canvas").appendChild(renderer.domElement);
 }
 
 function initScene() {
